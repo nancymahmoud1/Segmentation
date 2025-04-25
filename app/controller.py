@@ -1,0 +1,125 @@
+from PyQt5 import QtWidgets
+
+# Core utility and services
+from app.utils.clean_cache import remove_directories
+from app.utils.logging_manager import LoggingManager
+from app.services.image_service import ImageServices
+
+# Main GUI design
+from app.design.main_layout import Ui_MainWindow
+
+# Image processing functionality
+import cv2
+
+
+class MainWindowController:
+    def __init__(self):
+        self.app = QtWidgets.QApplication([])
+        self.MainWindow = QtWidgets.QMainWindow()
+
+        self.path = None
+        self.path_1 = None
+        self.path_2 = None
+
+        self.original_image = None
+        self.processed_image = None
+
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.MainWindow)
+        self.log = LoggingManager()
+
+        self.srv = ImageServices()
+
+
+        # Connect signals to slots
+        self.setupConnections()
+
+    def run(self):
+        """Run the application."""
+        self.MainWindow.showFullScreen()
+        self.app.exec_()
+
+    def setupConnections(self):
+        """Connect buttons to their respective methods."""
+        self.ui.quit_app_button.clicked.connect(self.closeApp)
+        self.ui.upload_button.clicked.connect(self.drawImage)
+
+        self.ui.save_image_button.clicked.connect(lambda: self.srv.save_image(self.processed_image))
+        self.ui.clear_image_button.clicked.connect(self.clear_images)
+        self.ui.reset_image_button.clicked.connect(self.reset_images)
+
+        # Thresholding connections
+        self.ui.thresholding_button.clicked.connect(self.show_thresholding_controls)
+        self.ui.back_button.clicked.connect(self.show_main_buttons)
+
+
+        # Segmentation connections
+        self.ui.segmentation_button.clicked.connect(self.show_segmentation_controls)
+        self.ui.seg_back_button.clicked.connect(self.show_main_buttons)
+
+    def drawImage(self):
+        self.path = self.srv.upload_image_file()
+
+        if not self.path:
+            return
+
+        self.original_image = cv2.imread(self.path)
+        if self.original_image is None:
+            return
+
+        self.processed_image = self.original_image.copy()
+
+        # Clear any existing images displayed in the group boxes
+        self.srv.clear_image(self.ui.original_groupBox)
+        self.srv.clear_image(self.ui.processed_groupBox)
+
+        # Display the images in their respective group boxes
+        self.srv.set_image_in_groupbox(self.ui.original_groupBox, self.original_image)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+
+        # Show the group boxes if they're hidden
+        self.ui.original_groupBox.show()
+        self.ui.processed_groupBox.show()
+
+    def clear_images(self):
+        if self.original_image is None:
+            return
+
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.clear_image(self.ui.original_groupBox)
+
+    def reset_images(self):
+        if self.original_image is None:
+            return
+
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.original_image)
+
+    def showProcessed(self):
+        if self.processed_image is None:
+            print("Error: Processed image is None.")
+            return
+
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+
+    # Thresholding methods
+    def show_thresholding_controls(self):
+        self.ui.sidebar_stacked.setCurrentIndex(1)
+
+
+    # Segmentation methods
+    def show_segmentation_controls(self):
+        self.ui.sidebar_stacked.setCurrentIndex(2)
+
+
+    def closeApp(self):
+        """Close the application."""
+        remove_directories()
+        self.app.quit()
+
+    def show_main_buttons(self):
+        """Switch back to the main buttons page and hide the image group boxes."""
+        self.ui.sidebar_stacked.setCurrentIndex(0)
+
+
