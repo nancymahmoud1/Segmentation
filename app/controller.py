@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt5 import QtWidgets
 
 # Core utility and services
@@ -7,6 +8,7 @@ from app.services.image_service import ImageServices
 
 # Main GUI design
 from app.design.main_layout import Ui_MainWindow
+from app.processing.segmentation_clusters import kmeans_segmentation
 
 # Image processing functionality
 import cv2
@@ -30,7 +32,6 @@ class MainWindowController:
 
         self.srv = ImageServices()
 
-
         # Connect signals to slots
         self.setupConnections()
 
@@ -52,10 +53,10 @@ class MainWindowController:
         self.ui.thresholding_button.clicked.connect(self.show_thresholding_controls)
         self.ui.thresholding_back_button.clicked.connect(self.show_main_buttons)
 
-
         # Segmentation connections
         self.ui.segmentation_button.clicked.connect(self.show_segmentation_controls)
         self.ui.seg_back_button.clicked.connect(self.show_main_buttons)
+        self.ui.apply_kMeans_segmentation.clicked.connect(self.k_mean_clustering)
 
     def drawImage(self):
         self.path = self.srv.upload_image_file()
@@ -80,6 +81,20 @@ class MainWindowController:
         # Show the group boxes if they're hidden
         self.ui.original_groupBox.show()
         self.ui.processed_groupBox.show()
+
+    def k_mean_clustering(self):
+        k = self.ui.kmeans_clusters_slider.value()
+        segmented_labels = kmeans_segmentation(self.original_image.copy(), k)
+
+        # Colorize the segmentation
+        segmented_display = cv2.applyColorMap(
+            (segmented_labels * int(255 / (k - 1))).astype(np.uint8),
+            cv2.COLORMAP_JET
+        )
+
+        self.processed_image = segmented_display
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def clear_images(self):
         if self.original_image is None:
@@ -107,11 +122,9 @@ class MainWindowController:
     def show_thresholding_controls(self):
         self.ui.sidebar_stacked.setCurrentIndex(1)
 
-
     # Segmentation methods
     def show_segmentation_controls(self):
         self.ui.sidebar_stacked.setCurrentIndex(2)
-
 
     def closeApp(self):
         """Close the application."""
@@ -121,5 +134,3 @@ class MainWindowController:
     def show_main_buttons(self):
         """Switch back to the main buttons page and hide the image group boxes."""
         self.ui.sidebar_stacked.setCurrentIndex(0)
-
-

@@ -403,19 +403,10 @@ class Ui_MainWindow(object):
         self.seg_back_button.setIcon(QIcon(self.back_icon_path))
         self.seg_back_button.setIconSize(QSize(50, 50))
 
-        self.kmeans_button = self.util.createButton("K-means", self.button_style)
+        self.apply_kMeans_segmentation = self.util.createButton("Apply K Means", self.button_style)
         self.region_growing_button = self.util.createButton("Region Growing", self.button_style)
         self.mean_shift_button = self.util.createButton("Mean Shift", self.button_style)
         self.agglomerative_button = self.util.createButton("Agglomerative", self.button_style)
-
-        # Add buttons to layout
-        self.page_segmentation_layout.addWidget(self.seg_back_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
-        self.page_segmentation_layout.addWidget(self.kmeans_button)
-        self.page_segmentation_layout.addWidget(self.region_growing_button)
-        self.page_segmentation_layout.addWidget(self.mean_shift_button)
-        self.page_segmentation_layout.addWidget(self.agglomerative_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         # Create and add sliders
         self.kmeans_clusters_label = self.util.createLabel("Number of Clusters:", "color: white;")
@@ -436,9 +427,21 @@ class Ui_MainWindow(object):
         self.mean_shift_bandwidth_slider.setValue(20)
         self.mean_shift_bandwidth_slider.setStyleSheet(self.slider_style)
 
-        # Add widgets to layout
+        # Add buttons to layout
+        self.page_segmentation_layout.addWidget(self.seg_back_button)
+
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
+
         self.page_segmentation_layout.addWidget(self.kmeans_clusters_label)
         self.page_segmentation_layout.addWidget(self.kmeans_clusters_slider)
+        self.page_segmentation_layout.addWidget(self.apply_kMeans_segmentation)
+
+        self.page_segmentation_layout.addWidget(self.region_growing_button)
+        self.page_segmentation_layout.addWidget(self.mean_shift_button)
+        self.page_segmentation_layout.addWidget(self.agglomerative_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
+
+        # Add widgets to layout
         self.page_segmentation_layout.addWidget(self.region_threshold_label)
         self.page_segmentation_layout.addWidget(self.region_threshold_slider)
         self.page_segmentation_layout.addWidget(self.mean_shift_bandwidth_label)
