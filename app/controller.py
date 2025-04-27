@@ -50,7 +50,7 @@ class MainWindowController:
 
         # Thresholding connections
         self.ui.thresholding_button.clicked.connect(self.show_thresholding_controls)
-        self.ui.back_button.clicked.connect(self.show_main_buttons)
+        self.ui.thresholding_back_button.clicked.connect(self.show_main_buttons)
 
 
         # Segmentation connections

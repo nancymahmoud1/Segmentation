@@ -1,4 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QSize
+
 from app.design.tools.gui_utilities import GUIUtilities
 
 
@@ -160,6 +163,8 @@ class Ui_MainWindow(object):
                 font-weight: bold;
             }
         """
+
+        self.back_icon_path = "static/icons/Back-icon.png"
 
     # ----------------------------------------------------------------------
     # Title + Navbar
@@ -333,14 +338,17 @@ class Ui_MainWindow(object):
         self.page_thresholding_layout.setContentsMargins(10, 10, 10, 10)
 
         # Create and store buttons as attributes
-        self.back_button = self.util.createButton("<-", self.quit_button_style)
+        self.thresholding_back_button = self.util.createButton("", self.quit_button_style)
+        self.thresholding_back_button.setIcon(QIcon(self.back_icon_path))
+        self.thresholding_back_button.setIconSize(QSize(50, 50))
+
         self.otsu_button = self.util.createButton("Otsu Thresholding", self.button_style)
         self.optimal_button = self.util.createButton("Optimal Thresholding", self.button_style)
         self.spectral_button = self.util.createButton("Spectral Thresholding", self.button_style)
         self.local_button = self.util.createButton("Local Thresholding", self.button_style)
 
         # Add buttons to layout
-        self.page_thresholding_layout.addWidget(self.back_button)
+        self.page_thresholding_layout.addWidget(self.thresholding_back_button)
         self.page_thresholding_layout.addWidget(self.util.createSeparator())
         self.page_thresholding_layout.addWidget(self.otsu_button)
         self.page_thresholding_layout.addWidget(self.optimal_button)
@@ -391,7 +399,10 @@ class Ui_MainWindow(object):
         self.page_segmentation_layout.setContentsMargins(10, 10, 10, 10)
 
         # Create and store buttons as attributes
-        self.seg_back_button = self.util.createButton("<-", self.quit_button_style)
+        self.seg_back_button = self.util.createButton("", self.quit_button_style)
+        self.seg_back_button.setIcon(QIcon(self.back_icon_path))
+        self.seg_back_button.setIconSize(QSize(50, 50))
+
         self.kmeans_button = self.util.createButton("K-means", self.button_style)
         self.region_growing_button = self.util.createButton("Region Growing", self.button_style)
         self.mean_shift_button = self.util.createButton("Mean Shift", self.button_style)
