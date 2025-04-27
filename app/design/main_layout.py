@@ -174,11 +174,11 @@ class Ui_MainWindow(object):
 
         self.title_label = self.util.createLabel(
             text="Image Processing Studio",
-            style="color:white; padding:10px; padding-left:0; font-size: 32px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);",
+            style="color:white; padding:10px; padding-left:0; font-size: 32px; font-weight: bold",
             isHead=True
         )
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Helvetica")
         font.setPointSize(32)
         font.setBold(True)
         self.title_label.setFont(font)
