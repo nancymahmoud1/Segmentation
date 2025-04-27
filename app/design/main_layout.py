@@ -173,7 +173,7 @@ class Ui_MainWindow(object):
         self.title_icon.setObjectName("title_icon")
 
         self.title_label = self.util.createLabel(
-            text="Image Processing Studio",
+            text="SegmaVision",
             style="color:white; padding:10px; padding-left:0; font-size: 32px; font-weight: bold",
             isHead=True
         )
@@ -333,7 +333,7 @@ class Ui_MainWindow(object):
         self.page_thresholding_layout.setContentsMargins(10, 10, 10, 10)
 
         # Create and store buttons as attributes
-        self.back_button = self.util.createButton("<-",  self.quit_button_style)
+        self.back_button = self.util.createButton("<-", self.quit_button_style)
         self.otsu_button = self.util.createButton("Otsu Thresholding", self.button_style)
         self.optimal_button = self.util.createButton("Optimal Thresholding", self.button_style)
         self.spectral_button = self.util.createButton("Spectral Thresholding", self.button_style)
@@ -390,7 +390,6 @@ class Ui_MainWindow(object):
         self.page_segmentation_layout.setSpacing(22)
         self.page_segmentation_layout.setContentsMargins(10, 10, 10, 10)
 
-
         # Create and store buttons as attributes
         self.seg_back_button = self.util.createButton("<-", self.quit_button_style)
         self.kmeans_button = self.util.createButton("K-means", self.button_style)
@@ -441,6 +440,7 @@ class Ui_MainWindow(object):
         if self.page_segmentation_controls not in [self.sidebar_stacked.widget(i) for i in
                                                    range(self.sidebar_stacked.count())]:
             self.sidebar_stacked.addWidget(self.page_segmentation_controls)
+
     # ----------------------------------------------------------------------
     # Retranslate
     # ----------------------------------------------------------------------
@@ -459,7 +459,6 @@ class Ui_MainWindow(object):
         # Show the original and processed group boxes
         self.original_groupBox.show()
         self.processed_groupBox.show()
-
 
         # Switch to the main buttons page
         self.sidebar_stacked.setCurrentIndex(0)
