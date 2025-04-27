@@ -8,7 +8,7 @@ from app.services.image_service import ImageServices
 
 # Main GUI design
 from app.design.main_layout import Ui_MainWindow
-from app.processing.segmentation_clusters import kmeans_segmentation
+from app.processing.segmentation_clusters import kMeans_segmentation, agglomerative_segmentation
 
 # Image processing functionality
 import cv2
@@ -56,7 +56,8 @@ class MainWindowController:
         # Segmentation connections
         self.ui.segmentation_button.clicked.connect(self.show_segmentation_controls)
         self.ui.seg_back_button.clicked.connect(self.show_main_buttons)
-        self.ui.apply_kMeans_segmentation.clicked.connect(self.k_mean_clustering)
+        self.ui.apply_kMeans_clustering_button.clicked.connect(self.apply_k_mean_clustering)
+        self.ui.apply_agglomerative_clustering_button.clicked.connect(self.apply_agglomerative_clustering)
 
     def drawImage(self):
         self.path = self.srv.upload_image_file()
@@ -82,11 +83,26 @@ class MainWindowController:
         self.ui.original_groupBox.show()
         self.ui.processed_groupBox.show()
 
-    def k_mean_clustering(self):
-        k = self.ui.kmeans_clusters_slider.value()
-        segmented_labels = kmeans_segmentation(self.original_image.copy(), k)
+    def apply_k_mean_clustering(self):
+        k = self.ui.clusters_number_slider.value()
+        segmented_labels = kMeans_segmentation(self.original_image.copy(), k)
 
         # Colorize the segmentation
+        segmented_display = cv2.applyColorMap(
+            (segmented_labels * int(255 / (k - 1))).astype(np.uint8),
+            cv2.COLORMAP_JET
+        )
+
+        self.processed_image = segmented_display
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+
+    def apply_agglomerative_clustering(self):
+        k = self.ui.clusters_number_slider.value()  # Get number of clusters from the slider
+
+        segmented_labels = agglomerative_segmentation(self.original_image.copy(), k)
+
+        # Colorize the segmentation result for display
         segmented_display = cv2.applyColorMap(
             (segmented_labels * int(255 / (k - 1))).astype(np.uint8),
             cv2.COLORMAP_JET

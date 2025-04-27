@@ -403,17 +403,17 @@ class Ui_MainWindow(object):
         self.seg_back_button.setIcon(QIcon(self.back_icon_path))
         self.seg_back_button.setIconSize(QSize(50, 50))
 
-        self.apply_kMeans_segmentation = self.util.createButton("Apply K Means", self.button_style)
+        self.apply_kMeans_clustering_button = self.util.createButton("Apply K Means", self.button_style)
         self.region_growing_button = self.util.createButton("Region Growing", self.button_style)
         self.mean_shift_button = self.util.createButton("Mean Shift", self.button_style)
-        self.agglomerative_button = self.util.createButton("Agglomerative", self.button_style)
+        self.apply_agglomerative_clustering_button = self.util.createButton("Apply Agglomerative", self.button_style)
 
         # Create and add sliders
         self.kmeans_clusters_label = self.util.createLabel("Number of Clusters:", "color: white;")
-        self.kmeans_clusters_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.kmeans_clusters_slider.setRange(2, 10)
-        self.kmeans_clusters_slider.setValue(3)
-        self.kmeans_clusters_slider.setStyleSheet(self.slider_style)
+        self.clusters_number_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.clusters_number_slider.setRange(2, 10)
+        self.clusters_number_slider.setValue(3)
+        self.clusters_number_slider.setStyleSheet(self.slider_style)
 
         self.region_threshold_label = self.util.createLabel("Region Threshold:", "color: white;")
         self.region_threshold_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -433,12 +433,13 @@ class Ui_MainWindow(object):
         self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         self.page_segmentation_layout.addWidget(self.kmeans_clusters_label)
-        self.page_segmentation_layout.addWidget(self.kmeans_clusters_slider)
-        self.page_segmentation_layout.addWidget(self.apply_kMeans_segmentation)
+        self.page_segmentation_layout.addWidget(self.clusters_number_slider)
+        self.page_segmentation_layout.addWidget(self.apply_kMeans_clustering_button)
+        self.page_segmentation_layout.addWidget(self.apply_agglomerative_clustering_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         self.page_segmentation_layout.addWidget(self.region_growing_button)
         self.page_segmentation_layout.addWidget(self.mean_shift_button)
-        self.page_segmentation_layout.addWidget(self.agglomerative_button)
         self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         # Add widgets to layout
