@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 # Core utility and services
 from app.utils.clean_cache import remove_directories
@@ -10,7 +10,7 @@ from app.services.image_service import ImageServices
 from app.design.main_layout import Ui_MainWindow
 from app.processing.segmentation_clusters import kMeans_segmentation, agglomerative_segmentation
 from app.processing.thresholding import Thresholding
-
+from app.processing.segmentation import ImageSegmenter
 # Image processing functionality
 import cv2
 
@@ -32,6 +32,7 @@ class MainWindowController:
         self.log = LoggingManager()
 
         self.srv = ImageServices()
+        self.segmenter = ImageSegmenter()
 
         # Connect signals to slots
         self.setupConnections()
@@ -61,7 +62,13 @@ class MainWindowController:
         self.ui.apply_kMeans_clustering_button.clicked.connect(self.apply_k_mean_clustering)
         self.ui.apply_agglomerative_clustering_button.clicked.connect(self.apply_agglomerative_clustering)
 
-        # self.ui.spectral_threshold_apply_button.clicked.connect(self.apply_spectral_thresholding)
+        # New segmentation methods
+        self.ui.region_growing_button.clicked.connect(self.apply_region_growing)
+        self.ui.mean_shift_button.clicked.connect(self.apply_mean_shift)
+        self.ui.region_growing_tolerance_slider.valueChanged.connect(self.update_region_growing_tolerance)
+
+        # Mouse click for seed point
+        self.ui.processed_groupBox.mousePressEvent = self.get_seed_point
 
     def drawImage(self):
         self.path = self.srv.upload_image_file()
@@ -121,6 +128,65 @@ class MainWindowController:
         self.processed_image = segmented_display
         self.srv.clear_image(self.ui.processed_groupBox)
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+
+
+    def update_region_growing_tolerance(self):
+        """Update tolerance value from slider."""
+        self.segmenter.set_tolerance(self.ui.region_growing_tolerance_slider.value())
+
+    def get_seed_point(self, event):
+        """Handle mouse click to set seed point for region growing."""
+        if self.original_image is None:
+            return
+
+        # Get the label widget that displays the image
+        label = self.ui.processed_groupBox.findChild(QtWidgets.QLabel)
+        if not label or label.pixmap() is None:
+            return
+
+        # Calculate position in image coordinates
+        pixmap = label.pixmap()
+        pos = event.pos()
+
+        # Scale coordinates from widget to image
+        x = int(pos.x() * (self.original_image.shape[1] / pixmap.width()))
+        y = int(pos.y() * (self.original_image.shape[0] / pixmap.height()))
+
+        # Ensure coordinates are within bounds
+        x = max(0, min(x, self.original_image.shape[1] - 1))
+        y = max(0, min(y, self.original_image.shape[0] - 1))
+
+        self.segmenter.set_seed_point((y, x))
+        print(f"Seed point set to: {(y, x)}")
+
+    def apply_region_growing(self):
+        """Apply region growing segmentation."""
+        if self.original_image is None:
+            return
+
+        try:
+            segmented = self.segmenter.region_growing(self.original_image)
+            self.processed_image = cv2.cvtColor(segmented, cv2.COLOR_GRAY2BGR)
+            self.showProcessed()
+        except ValueError as e:
+            print(str(e))
+            QtWidgets.QMessageBox.warning(self.MainWindow, "Error", str(e))
+
+    def apply_mean_shift(self):
+        """Apply mean shift segmentation."""
+        if self.original_image is None:
+            return
+
+        # Show busy cursor during processing
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        try:
+            self.processed_image = self.segmenter.mean_shift(self.original_image)
+            self.showProcessed()
+        except Exception as e:
+            print(str(e))
+            QtWidgets.QMessageBox.warning(self.MainWindow, "Error", str(e))
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def apply_spectral_thresholding(self):
         segmented_image = Thresholding.spectral_thresholding(self.original_image.copy())
