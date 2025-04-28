@@ -332,21 +332,51 @@ class Ui_MainWindow(object):
 
         # Create new layout with consistent spacing
         self.page_thresholding_layout = QtWidgets.QVBoxLayout(self.page_thresholding_controls)
-        self.page_thresholding_layout.setSpacing(30)
+        self.page_thresholding_layout.setSpacing(25)
         self.page_thresholding_layout.setContentsMargins(10, 10, 10, 10)
 
+        # Create and store buttons as attributes
         # Create and store buttons as attributes
         self.thresholding_back_button = self.util.createButton("", self.quit_button_style)
         self.thresholding_back_button.setIcon(QIcon(self.back_icon_path))
         self.thresholding_back_button.setIconSize(QSize(50, 50))
+        # Add threshold type selection (Local/Global)
+        self.threshold_type_label = self.util.createLabel("Threshold Type:", "color: white; font-weight: bold;")
+        self.threshold_type_combo = QtWidgets.QComboBox()
+        self.threshold_type_combo.addItems(["Global", "Local"])
+        self.threshold_type_combo.setStyleSheet("""
+            QComboBox {
+                background: #16213e;
+                color: white;
+                border: 1px solid #0f3460;
+                padding: 5px;
+                border-radius: 5px;
+            }
+            QComboBox:hover {
+                border: 1px solid #e94560;
+            }
+        """)
+
+        # Create value display labels for sliders
+        self.block_size_value_label = self.util.createLabel("11", "color: #e94560; font-weight: bold;")
+
+        # Create horizontal layouts for slider value displays
+        block_size_layout = QtWidgets.QHBoxLayout()
+        block_size_layout.addWidget(self.util.createLabel("Block Size:", "color: white;"))
+        block_size_layout.addWidget(self.block_size_value_label)
+
+
 
         self.otsu_button = self.util.createButton("Otsu Thresholding", self.button_style)
         self.optimal_button = self.util.createButton("Optimal Thresholding", self.button_style)
         self.spectral_threshold_apply_button = self.util.createButton("Spectral Thresholding", self.button_style)
         self.local_button = self.util.createButton("Local Thresholding", self.button_style)
 
-        # Add buttons to layout
+        # Add widgets to layout
         self.page_thresholding_layout.addWidget(self.thresholding_back_button)
+        self.page_thresholding_layout.addWidget(self.util.createSeparator())
+        self.page_thresholding_layout.addWidget(self.threshold_type_label)
+        self.page_thresholding_layout.addWidget(self.threshold_type_combo)
         self.page_thresholding_layout.addWidget(self.util.createSeparator())
         self.page_thresholding_layout.addWidget(self.otsu_button)
         self.page_thresholding_layout.addWidget(self.optimal_button)
@@ -355,23 +385,19 @@ class Ui_MainWindow(object):
         self.page_thresholding_layout.addWidget(self.util.createSeparator())
 
         # Create and add sliders
-        self.block_size_label = self.util.createLabel("Block Size:", "color: white;")
         self.block_size_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.block_size_slider.setRange(3, 31)
         self.block_size_slider.setValue(11)
         self.block_size_slider.setSingleStep(2)
         self.block_size_slider.setStyleSheet(self.slider_style)
 
-        self.offset_label = self.util.createLabel("Offset:", "color: white;")
-        self.offset_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.offset_slider.setRange(0, 50)
-        self.offset_slider.setValue(10)
-        self.offset_slider.setStyleSheet(self.slider_style)
 
-        self.page_thresholding_layout.addWidget(self.block_size_label)
+        # Add slider widgets with their value displays
+        self.page_thresholding_layout.addLayout(block_size_layout)
         self.page_thresholding_layout.addWidget(self.block_size_slider)
-        self.page_thresholding_layout.addWidget(self.offset_label)
-        self.page_thresholding_layout.addWidget(self.offset_slider)
+
+        # Connect slider signals to update the value labels
+        self.block_size_slider.valueChanged.connect(lambda val: self.block_size_value_label.setText(str(val)))
 
         # Add stretch to push content up
         self.page_thresholding_layout.addStretch(1)
@@ -397,54 +423,71 @@ class Ui_MainWindow(object):
         self.page_segmentation_layout.setContentsMargins(10, 10, 10, 10)
 
         # Create and store buttons as attributes
+        # Create and store buttons as attributes
         self.seg_back_button = self.util.createButton("", self.quit_button_style)
         self.seg_back_button.setIcon(QIcon(self.back_icon_path))
         self.seg_back_button.setIconSize(QSize(50, 50))
-
-        self.apply_kMeans_clustering_button = self.util.createButton("Apply K Means", self.button_style)
+        self.apply_kMeans_clustering_button = self.util.createButton("K-means", self.button_style)
         self.region_growing_button = self.util.createButton("Region Growing", self.button_style)
         self.mean_shift_button = self.util.createButton("Mean Shift", self.button_style)
-        self.apply_agglomerative_clustering_button = self.util.createButton("Apply Agglomerative", self.button_style)
+        self.apply_agglomerative_clustering_button = self.util.createButton("Agglomerative", self.button_style)
+
+        # Create value display labels for sliders
+        self.kmeans_clusters_value = self.util.createLabel("3", "color: #e94560; font-weight: bold;")
+        self.region_threshold_value = self.util.createLabel("10", "color: #e94560; font-weight: bold;")
+        self.mean_shift_bandwidth_value = self.util.createLabel("20", "color: #e94560; font-weight: bold;")
+
+        # Create horizontal layouts for slider value displays
+        kmeans_layout = QtWidgets.QHBoxLayout()
+        kmeans_layout.addWidget(self.util.createLabel("Number of Clusters:", "color: white;"))
+        kmeans_layout.addWidget(self.kmeans_clusters_value)
+
+        region_layout = QtWidgets.QHBoxLayout()
+        region_layout.addWidget(self.util.createLabel("Region Threshold:", "color: white;"))
+        region_layout.addWidget(self.region_threshold_value)
+
+        bandwidth_layout = QtWidgets.QHBoxLayout()
+        bandwidth_layout.addWidget(self.util.createLabel("Bandwidth:", "color: white;"))
+        bandwidth_layout.addWidget(self.mean_shift_bandwidth_value)
+
+        # Add buttons to layout
+        self.page_segmentation_layout.addWidget(self.seg_back_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
+        self.page_segmentation_layout.addWidget(self.apply_kMeans_clustering_button)
+        self.page_segmentation_layout.addWidget(self.region_growing_button)
+        self.page_segmentation_layout.addWidget(self.mean_shift_button)
+        self.page_segmentation_layout.addWidget(self.apply_agglomerative_clustering_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         # Create and add sliders
-        self.kmeans_clusters_label = self.util.createLabel("Number of Clusters:", "color: white;")
-        self.clusters_number_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.clusters_number_slider.setRange(2, 10)
-        self.clusters_number_slider.setValue(3)
-        self.clusters_number_slider.setStyleSheet(self.slider_style)
+        self.kmeans_clusters_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.kmeans_clusters_slider.setRange(2, 10)
+        self.kmeans_clusters_slider.setValue(3)
+        self.kmeans_clusters_slider.setStyleSheet(self.slider_style)
 
-        self.region_threshold_label = self.util.createLabel("Region Threshold:", "color: white;")
         self.region_threshold_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.region_threshold_slider.setRange(1, 50)
         self.region_threshold_slider.setValue(10)
         self.region_threshold_slider.setStyleSheet(self.slider_style)
 
-        self.mean_shift_bandwidth_label = self.util.createLabel("Bandwidth:", "color: white;")
         self.mean_shift_bandwidth_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.mean_shift_bandwidth_slider.setRange(5, 50)
         self.mean_shift_bandwidth_slider.setValue(20)
         self.mean_shift_bandwidth_slider.setStyleSheet(self.slider_style)
 
-        # Add buttons to layout
-        self.page_segmentation_layout.addWidget(self.seg_back_button)
-
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
-
-        self.page_segmentation_layout.addWidget(self.kmeans_clusters_label)
-        self.page_segmentation_layout.addWidget(self.clusters_number_slider)
-        self.page_segmentation_layout.addWidget(self.apply_kMeans_clustering_button)
-        self.page_segmentation_layout.addWidget(self.apply_agglomerative_clustering_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
-
-        self.page_segmentation_layout.addWidget(self.region_growing_button)
-        self.page_segmentation_layout.addWidget(self.mean_shift_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
-
-        # Add widgets to layout
-        self.page_segmentation_layout.addWidget(self.region_threshold_label)
+        # Add widgets to layout with their value displays
+        self.page_segmentation_layout.addLayout(kmeans_layout)
+        self.page_segmentation_layout.addWidget(self.kmeans_clusters_slider)
+        self.page_segmentation_layout.addLayout(region_layout)
         self.page_segmentation_layout.addWidget(self.region_threshold_slider)
-        self.page_segmentation_layout.addWidget(self.mean_shift_bandwidth_label)
+        self.page_segmentation_layout.addLayout(bandwidth_layout)
         self.page_segmentation_layout.addWidget(self.mean_shift_bandwidth_slider)
+
+        # Connect slider signals to update the value labels
+        self.kmeans_clusters_slider.valueChanged.connect(lambda val: self.kmeans_clusters_value.setText(str(val)))
+        self.region_threshold_slider.valueChanged.connect(lambda val: self.region_threshold_value.setText(str(val)))
+        self.mean_shift_bandwidth_slider.valueChanged.connect(
+            lambda val: self.mean_shift_bandwidth_value.setText(str(val)))
 
         # Add stretch to push content up
         self.page_segmentation_layout.addStretch(1)
@@ -453,7 +496,6 @@ class Ui_MainWindow(object):
         if self.page_segmentation_controls not in [self.sidebar_stacked.widget(i) for i in
                                                    range(self.sidebar_stacked.count())]:
             self.sidebar_stacked.addWidget(self.page_segmentation_controls)
-
     # ----------------------------------------------------------------------
     # Retranslate
     # ----------------------------------------------------------------------
