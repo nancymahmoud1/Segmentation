@@ -61,7 +61,7 @@ class MainWindowController:
         self.ui.apply_kMeans_clustering_button.clicked.connect(self.apply_k_mean_clustering)
         self.ui.apply_agglomerative_clustering_button.clicked.connect(self.apply_agglomerative_clustering)
 
-        self.ui.spectral_threshold_apply_button.clicked.connect(self.apply_spectral_thresholding)
+        # self.ui.spectral_threshold_apply_button.clicked.connect(self.apply_spectral_thresholding)
 
     def drawImage(self):
         self.path = self.srv.upload_image_file()
@@ -88,8 +88,8 @@ class MainWindowController:
         self.ui.processed_groupBox.show()
 
     def optimal_thresholding(self):
-        grey_image = cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
-        self.processed_image = Thresholding.optimal(grey_image)
+        gray_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
+        self.processed_image=Thresholding.optimal_local(gray_image)
         self.srv.clear_image(self.ui.processed_groupBox)
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
@@ -125,9 +125,9 @@ class MainWindowController:
     def apply_spectral_thresholding(self):
         segmented_image = Thresholding.spectral_thresholding(self.original_image.copy())
 
-        self.processed_image = segmented_image
-        self.srv.clear_image(self.ui.processed_groupBox)
-        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+    #     self.processed_image = segmented_image
+    #     self.srv.clear_image(self.ui.processed_groupBox)
+    #     self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def clear_images(self):
         if self.original_image is None:
