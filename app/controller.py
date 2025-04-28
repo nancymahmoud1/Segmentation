@@ -9,7 +9,8 @@ from app.services.image_service import ImageServices
 # Main GUI design
 from app.design.main_layout import Ui_MainWindow
 from app.processing.segmentation_clusters import kMeans_segmentation, agglomerative_segmentation
-from app.processing.thresholding import spectral_thresholding
+# from app.processing.thresholding import spectral_thresholding
+from app.processing.thresholding import Thresholding
 
 # Image processing functionality
 import cv2
