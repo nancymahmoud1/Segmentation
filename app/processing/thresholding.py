@@ -1,31 +1,41 @@
 import numpy as np
-import cv2
-from scipy.signal import find_peaks
+
 
 class Thresholding:
-
-
+    @staticmethod
     def spectral_thresholding(image):
+        # Step 1: Convert to grayscale 
         if len(image.shape) == 3:
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray_image = (0.2989 * image[:, :, 2] + 0.5870 * image[:, :, 1] + 0.1140 * image[:, :, 0]).astype(np.uint8)
         else:
             gray_image = image.copy()
 
-        hist = cv2.calcHist([gray_image], [0], None, [256], [0, 256]).flatten()
-        hist_smooth = cv2.GaussianBlur(hist.reshape(-1, 1), (5, 5), 0).flatten()
+        # Step 2: Build histogram 
+        hist, _ = np.histogram(gray_image, bins=256, range=(0, 256))
 
-        peaks, _ = find_peaks(hist_smooth, distance=20, prominence=0.01 * np.max(hist_smooth))
+        # Step 3: Smooth histogram  (simple moving average)
+        window_size = 5
+        hist_smooth = np.convolve(hist, np.ones(window_size) / window_size, mode='same')
 
+        # Step 4: Find peaks 
+        peaks = []
+        for i in range(1, len(hist_smooth) - 1):
+            if hist_smooth[i] > hist_smooth[i - 1] and hist_smooth[i] > hist_smooth[i + 1]:
+                peaks.append(i)
+
+        # Step 5: Safety check
         if len(peaks) < 2:
-            # Not enough peaks found, apply simple Otsu thresholding as fallback
-            _, segmented = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            mean_value = np.mean(gray_image)
+            segmented = np.where(gray_image > mean_value, 255, 0).astype(np.uint8)
             return segmented
 
+        # Step 6: Set thresholds
         thresholds = []
         for i in range(len(peaks) - 1):
             midpoint = (peaks[i] + peaks[i + 1]) // 2
             thresholds.append(midpoint)
 
+        # Step 7: Apply thresholding 
         segmented = np.zeros_like(gray_image)
 
         if len(thresholds) == 1:
@@ -54,36 +64,35 @@ class Thresholding:
 
         # Initialization:
         # corners=bg, others=obj
-        height, width=block.shape  
-        iterations=10
+        height, width = block.shape
+        iterations = 10
         output_block = block.copy()
 
-        bg_mask=np.zeros_like(block, dtype=bool)
-        bg_mask[0,0]=True
-        bg_mask[height-1,0]=True
-        bg_mask[0,width-1]=True
-        bg_mask[height-1,width-1]=True
-        obj_mask=~bg_mask
+        bg_mask = np.zeros_like(block, dtype=bool)
+        bg_mask[0, 0] = True
+        bg_mask[height - 1, 0] = True
+        bg_mask[0, width - 1] = True
+        bg_mask[height - 1, width - 1] = True
+        obj_mask = ~bg_mask
 
         # Iterate:
         for i in range(iterations):
-
-            obj_pixels=output_block[obj_mask]
-            bg_pixels=output_block[bg_mask]
+            obj_pixels = output_block[obj_mask]
+            bg_pixels = output_block[bg_mask]
 
             # find mean of bg and obj pixel values
-            obj_mean=np.mean(obj_pixels)
-            bg_mean=np.mean(bg_pixels)
+            obj_mean = np.mean(obj_pixels)
+            bg_mean = np.mean(bg_pixels)
 
             # compute threshold (T) as their avg bg+obj/2  (avg of means)
-            threshold=(obj_mean+bg_mean)/2
+            threshold = (obj_mean + bg_mean) / 2
 
             # clear the obj and bg pixels so they can be reused for the new values
-            obj_mask=output_block>threshold
-            bg_mask=output_block<=threshold
+            obj_mask = output_block > threshold
+            bg_mask = output_block <= threshold
 
         output_block[block > threshold] = 255  # Set object pixels to white
-        output_block[block <= threshold] = 0   # Set background pixels to black
+        output_block[block <= threshold] = 0  # Set background pixels to black
 
         return output_block
 
@@ -91,13 +100,13 @@ class Thresholding:
     def optimal_local(image, block_size):
         # hane3mel 7war el window
         # w le kol wa7da haneb3atha 3al function w nraga3 el processed block
-        height, width=image.shape 
-        output_image=np.zeros_like(image, dtype=np.float32)
+        height, width = image.shape
+        output_image = np.zeros_like(image, dtype=np.float32)
 
         for i in range(0, height, block_size):
             for j in range(0, width, block_size):
-                window = image[i:i+block_size, j:j+block_size]
+                window = image[i:i + block_size, j:j + block_size]
                 thresholded_window = Thresholding.optimal_global(window)
-                output_image[i:i+block_size, j:j+block_size] = thresholded_window
+                output_image[i:i + block_size, j:j + block_size] = thresholded_window
 
         return output_image

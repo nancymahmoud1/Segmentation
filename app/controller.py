@@ -9,7 +9,6 @@ from app.services.image_service import ImageServices
 # Main GUI design
 from app.design.main_layout import Ui_MainWindow
 from app.processing.segmentation_clusters import kMeans_segmentation, agglomerative_segmentation
-# from app.processing.thresholding import spectral_thresholding
 from app.processing.thresholding import Thresholding
 
 # Image processing functionality
@@ -89,8 +88,8 @@ class MainWindowController:
         self.ui.processed_groupBox.show()
 
     def optimal_thresholding(self):
-        grey_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
-        self.processed_image=Thresholding.optimal(grey_image)
+        grey_image = cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
+        self.processed_image = Thresholding.optimal(grey_image)
         self.srv.clear_image(self.ui.processed_groupBox)
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
@@ -124,7 +123,7 @@ class MainWindowController:
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def apply_spectral_thresholding(self):
-        segmented_image = spectral_thresholding(self.original_image.copy())
+        segmented_image = Thresholding.spectral_thresholding(self.original_image.copy())
 
         self.processed_image = segmented_image
         self.srv.clear_image(self.ui.processed_groupBox)
@@ -141,6 +140,7 @@ class MainWindowController:
         if self.original_image is None:
             return
 
+        self.processed_image = self.original_image.copy()
         self.srv.clear_image(self.ui.processed_groupBox)
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.original_image)
 
