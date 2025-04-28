@@ -91,13 +91,13 @@ class Thresholding:
             obj_mask = output_block > threshold
             bg_mask = output_block <= threshold
 
-        output_block[block > threshold] = 255  # Set object pixels to white
-        output_block[block <= threshold] = 0  # Set background pixels to black
+        output_block[output_block > threshold] = 255  # Set object pixels to white
+        output_block[output_block <= threshold] = 0   # Set background pixels to black
 
         return output_block
 
     @staticmethod
-    def optimal_local(image, block_size):
+    def optimal_local(image, block_size=30):
         # hane3mel 7war el window
         # w le kol wa7da haneb3atha 3al function w nraga3 el processed block
         height, width = image.shape
