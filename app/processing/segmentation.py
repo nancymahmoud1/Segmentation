@@ -21,15 +21,25 @@ class ImageSegmenter:
         self.seed_point = point
 
     def set_tolerance(self, tolerance):
+        # Controls how aggressively the region grows in region_growing()
+        # max. allowed intensity difference for region growing.
         self.tolerance = tolerance
 
-    # Set parameters for mean shift.
-    def set_mean_shift_params(self, bandwidth, spatial_radius, max_iterations):
-        self.bandwidth = bandwidth
+    # Set parameters for mean shift
+    def set_bandwidth(self, bandwidth):
+        # Max. allowed color distance (in LUV space) for pixels to be included in the same segment
+        self.bandwidth = bandwidth    # Larger values merge more colors, creating fewer segments
+
+    def set_mean_shift_params(self, spatial_radius, max_iterations):
+        # Physical distance defining the neighborhood around each pixel.
         self.spatial_radius = spatial_radius
+        # Max. steps for mean shift convergence
         self.max_iterations = max_iterations
 
     def region_growing(self, image):
+        """
+         Retruns : Segmented image as binary mask (0 = background, 255 = segmented region).
+        """
 
         if self.seed_point is None:
             raise ValueError("Seed point not set")
@@ -38,18 +48,20 @@ class ImageSegmenter:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         height, width = image.shape
-        segmented = np.zeros((height, width), dtype=np.uint8)
+        segmented = np.zeros((height, width), dtype=np.uint8)  #  Output binary mask (0 = background, 255 = segmented region).
         visited = np.zeros((height, width), dtype=bool)
 
-        seed_value = image[self.seed_point]
-        queue = deque([self.seed_point])
+        seed_value = image[self.seed_point]  # Intensity of the seed pixel.
+        queue = deque([self.seed_point]) # Starts with the seed point (BFS processing)
         visited[self.seed_point] = True
 
         while queue:
+            # Dequeue the next pixel and mark it as part of the segment .
             y, x = queue.popleft()
-            segmented[y, x] = 255
+            segmented[y, x] = 255  # (255 = white)
 
-            # Check 8-connected neighbors
+            # Check 8-connected neighbors :
+            # Check all adjacent pixels (including diagonals), skipping the center pixel.
             for dy in [-1, 0, 1]:
                 for dx in [-1, 0, 1]:
                     if dy == 0 and dx == 0:
@@ -63,7 +75,7 @@ class ImageSegmenter:
                             visited[ny, nx] = True
                             queue.append((ny, nx))
 
-        return segmented    # Segmented image as binary mask
+        return segmented
 
     def mean_shift(self, image):
         """Mean shift segmentation using sliding window """
@@ -75,12 +87,12 @@ class ImageSegmenter:
         # height, width = luv_image.shape[:2]
         # segmented = np.zeros_like(luv_image)
 
-        # Downsample the image (e.g., half resolution)
+        # Downsample the image ( half resolution) for faster processing
         scale_factor = 0.5
         small_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
 
         # Process the smaller image
-        small_luv = cv2.cvtColor(small_image, cv2.COLOR_BGR2LUV).astype(np.float32)
+        small_luv = cv2.cvtColor(small_image, cv2.COLOR_BGR2LUV).astype(np.float32) # Converts to LUV (better for perceptual color differences)
         height, width = small_luv.shape[:2]
         segmented_small = np.zeros_like(small_luv)
 
