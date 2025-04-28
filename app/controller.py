@@ -53,6 +53,7 @@ class MainWindowController:
         # Thresholding connections
         self.ui.thresholding_button.clicked.connect(self.show_thresholding_controls)
         self.ui.thresholding_back_button.clicked.connect(self.show_main_buttons)
+        self.ui.optimal_button.clicked.connect(self.optimal_thresholding)
 
         # Segmentation connections
         self.ui.segmentation_button.clicked.connect(self.show_segmentation_controls)
@@ -85,6 +86,12 @@ class MainWindowController:
         # Show the group boxes if they're hidden
         self.ui.original_groupBox.show()
         self.ui.processed_groupBox.show()
+
+    def optimal_thresholding(self):
+        grey_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
+        self.processed_image=Thresholding.optimal(grey_image)
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def apply_k_mean_clustering(self):
         k = self.ui.clusters_number_slider.value()
