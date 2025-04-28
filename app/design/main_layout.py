@@ -386,8 +386,8 @@ class Ui_MainWindow(object):
 
         # Create and add sliders
         self.block_size_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.block_size_slider.setRange(3, 31)
-        self.block_size_slider.setValue(11)
+        self.block_size_slider.setRange(2, 100)
+        self.block_size_slider.setValue(30)
         self.block_size_slider.setSingleStep(2)
         self.block_size_slider.setStyleSheet(self.slider_style)
 

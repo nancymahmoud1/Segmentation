@@ -101,12 +101,12 @@ class Thresholding:
         # hane3mel 7war el window
         # w le kol wa7da haneb3atha 3al function w nraga3 el processed block
         height, width = image.shape
-        output_image = np.zeros_like(image, dtype=np.float32)
+        output_image = np.zeros_like(image, dtype=np.int8)
 
         for i in range(0, height, block_size):
             for j in range(0, width, block_size):
-                window = image[i:i + block_size, j:j + block_size]
+                window = image[i:min(i + block_size, height), j:min(j + block_size, width)]
                 thresholded_window = Thresholding.optimal_global(window)
-                output_image[i:i + block_size, j:j + block_size] = thresholded_window
+                output_image[i:min(i + block_size, height), j:min(j + block_size, width)] = thresholded_window
 
         return output_image

@@ -87,9 +87,17 @@ class MainWindowController:
         self.ui.original_groupBox.show()
         self.ui.processed_groupBox.show()
 
-    def optimal_thresholding(self):
+    def optimal_thresholding(self, mode="Global", block_size=30):
         gray_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
-        self.processed_image=Thresholding.optimal_local(gray_image)
+        mode = self.ui.threshold_type_combo.currentText()
+        block_size=self.ui.block_size_slider.value()
+        print(block_size)
+
+        if mode=="Global":
+            self.processed_image=Thresholding.optimal_global(gray_image)
+        elif mode=="Local":
+            self.processed_image=Thresholding.optimal_local(gray_image, block_size)
+
         self.srv.clear_image(self.ui.processed_groupBox)
         self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
