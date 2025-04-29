@@ -54,7 +54,9 @@ class MainWindowController:
         # Thresholding connections
         self.ui.thresholding_button.clicked.connect(self.show_thresholding_controls)
         self.ui.thresholding_back_button.clicked.connect(self.show_main_buttons)
-        self.ui.optimal_button.clicked.connect(self.optimal_thresholding)
+        self.ui.optimal_button.clicked.connect(lambda: self.apply_thresholding(Thresholding.optimal_thresholding))
+        self.ui.spectral_threshold_apply_button.clicked.connect(lambda: self.apply_thresholding(Thresholding.spectral_thresholding))
+        self.ui.otsu_button.clicked.connect(lambda: self.apply_thresholding(Thresholding.otsu_thresholding))
 
         # Segmentation connections
         self.ui.segmentation_button.clicked.connect(self.show_segmentation_controls)
@@ -93,20 +95,6 @@ class MainWindowController:
         # Show the group boxes if they're hidden
         self.ui.original_groupBox.show()
         self.ui.processed_groupBox.show()
-
-    def optimal_thresholding(self, mode="Global", block_size=30):
-        gray_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
-        mode = self.ui.threshold_type_combo.currentText()
-        block_size=self.ui.block_size_slider.value()
-        print(block_size)
-
-        if mode=="Global":
-            self.processed_image=Thresholding.optimal_global(gray_image)
-        elif mode=="Local":
-            self.processed_image=Thresholding.optimal_local(gray_image, block_size)
-
-        self.srv.clear_image(self.ui.processed_groupBox)
-        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def apply_k_mean_clustering(self):
         k = self.ui.clusters_number_slider.value()
@@ -196,12 +184,28 @@ class MainWindowController:
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
+    def apply_thresholding(self, thresholding_method, mode="Global", block_size=30):
+        # ensure image is grayscale
+        gray_image=cv2.cvtColor(self.original_image, cv2.COLOR_BGR2GRAY)
+        # extract parameters
+        mode = self.ui.threshold_type_combo.currentText()
+        block_size=self.ui.block_size_slider.value()
+
+        # call the appropriate function based on mode
+        if mode=="Global":
+            self.processed_image=thresholding_method(gray_image)
+        elif mode=="Local":
+            self.processed_image=Thresholding.local_thresholding(gray_image, thresholding_method, block_size)
+
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+
     def apply_spectral_thresholding(self):
         segmented_image = Thresholding.spectral_thresholding(self.original_image.copy())
 
-    #     self.processed_image = segmented_image
-    #     self.srv.clear_image(self.ui.processed_groupBox)
-    #     self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
+        self.processed_image = segmented_image
+        self.srv.clear_image(self.ui.processed_groupBox)
+        self.srv.set_image_in_groupbox(self.ui.processed_groupBox, self.processed_image)
 
     def clear_images(self):
         if self.original_image is None:

@@ -358,7 +358,7 @@ class Ui_MainWindow(object):
         """)
 
         # Create value display labels for sliders
-        self.block_size_value_label = self.util.createLabel("11", "color: #e94560; font-weight: bold;")
+        self.block_size_value_label = self.util.createLabel("30", "color: #e94560; font-weight: bold;")
 
         # Create horizontal layouts for slider value displays
         block_size_layout = QtWidgets.QHBoxLayout()
