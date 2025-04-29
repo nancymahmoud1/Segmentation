@@ -458,10 +458,10 @@ class Ui_MainWindow(object):
         self.page_segmentation_layout.addWidget(self.util.createSeparator())
 
         # Create and add sliders
-        self.kmeans_clusters_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.kmeans_clusters_slider.setRange(2, 10)
-        self.kmeans_clusters_slider.setValue(3)
-        self.kmeans_clusters_slider.setStyleSheet(self.slider_style)
+        self.clusters_number_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.clusters_number_slider.setRange(2, 10)
+        self.clusters_number_slider.setValue(3)
+        self.clusters_number_slider.setStyleSheet(self.slider_style)
 
         self.region_growing_tolerance_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.region_growing_tolerance_slider.setRange(1, 50)
@@ -475,14 +475,14 @@ class Ui_MainWindow(object):
 
         # Add widgets to layout with their value displays
         self.page_segmentation_layout.addLayout(kmeans_layout)
-        self.page_segmentation_layout.addWidget(self.kmeans_clusters_slider)
+        self.page_segmentation_layout.addWidget(self.clusters_number_slider)
         self.page_segmentation_layout.addLayout(region_layout)
         self.page_segmentation_layout.addWidget(self.region_growing_tolerance_slider)
         self.page_segmentation_layout.addLayout(bandwidth_layout)
         self.page_segmentation_layout.addWidget(self.mean_shift_bandwidth_slider)
 
         # Connect slider signals to update the value labels
-        self.kmeans_clusters_slider.valueChanged.connect(lambda val: self.kmeans_clusters_value.setText(str(val)))
+        self.clusters_number_slider.valueChanged.connect(lambda val: self.kmeans_clusters_value.setText(str(val)))
         self.region_growing_tolerance_slider.valueChanged.connect(lambda val: self.region_threshold_value.setText(str(val)))
         self.mean_shift_bandwidth_slider.valueChanged.connect(
             lambda val: self.mean_shift_bandwidth_value.setText(str(val)))
