@@ -70,7 +70,7 @@ class MainWindowController:
         self.ui.region_growing_tolerance_slider.valueChanged.connect(self.update_region_growing_tolerance)
 
         # Mouse click for seed point
-        self.ui.processed_groupBox.mousePressEvent = self.get_seed_point
+        self.ui.original_groupBox.mousePressEvent = self.get_seed_point
 
     def drawImage(self):
         self.path = self.srv.upload_image_file()
@@ -129,6 +129,9 @@ class MainWindowController:
     def update_region_growing_tolerance(self):
         """Update tolerance value from slider."""
         self.segmenter.set_tolerance(self.ui.region_growing_tolerance_slider.value())
+
+    def update_bandwidth_mean_shift(self):
+        self.segmenter.set_bandwidth(self.ui.mean_shift_bandwidth_slider.value())
 
     def get_seed_point(self, event):
         """Handle mouse click to set seed point for region growing."""
