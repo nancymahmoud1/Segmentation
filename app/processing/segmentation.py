@@ -20,20 +20,15 @@ class ImageSegmenter:
         self.seed_point = point
 
     def set_tolerance(self, tolerance):
-        # Controls how aggressively the region grows in region_growing()
-        # max. allowed intensity difference for region growing.
+        # max. allowed intensity difference for region growing , increasing tolerance -> taking larger area (more growing)
         self.tolerance = tolerance
 
-    # Set parameters for mean shift
     def set_bandwidth(self, bandwidth):
         # Max. allowed color distance (in LUV space) for pixels to be included in the same segment
         self.bandwidth = bandwidth    # Larger values merge more colors, creating fewer segments
 
-    def set_mean_shift_params(self, spatial_radius, max_iterations):
-        # Physical distance defining the neighborhood around each pixel.
-        self.spatial_radius = spatial_radius
-
-        self.max_iterations = max_iterations  # Max. steps
+    def set_spatial_radius(self, radius):
+        self.spatial_radius = radius   # Controls how far to search for similar pixels
 
     def region_growing(self, image):
         """
@@ -43,14 +38,14 @@ class ImageSegmenter:
             raise ValueError("Seed point not set")
 
         if len(image.shape) > 2:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # convert from BGR to grayscale
 
         height, width = image.shape
-        segmented = np.zeros((height, width), dtype=np.uint8)  # Output binary mask (0 = background, 255 = segmented region).
-        visited = np.zeros((height, width), dtype=bool)
+        segmented = np.zeros((height, width), dtype=np.uint8)  # returned value :Output binary mask (0 = background, 255 = segmented region).
+        visited = np.zeros((height, width), dtype=bool)    # Tracks which pixels have been processed to avoid duplicates.
 
         seed_value = image[self.seed_point]  # Intensity of the seed pixel.
-        queue = deque([self.seed_point]) # Starts with the seed point (BFS processing : Ensures the region grows outward from the seed)
+        queue = deque([self.seed_point])           # Starts with the seed point (BFS processing : Ensures the region grows outward from the seed)
         visited[self.seed_point] = True
 
         while queue:
@@ -58,12 +53,12 @@ class ImageSegmenter:
             segmented[y, x] = 255  # white
 
             # Check 8-connected neighbors : all adjacent pixels (including diagonals), skipping the center pixel.
-            for dy in [-1, 0, 1]:   # (d-y): Vertical offset (-1 = above, 0 = same row, 1 = below).
+            for dy in [-1, 0, 1]:   # dy: Vertical offset (-1 = above, 0 = same row, 1 = below).
                 for dx in [-1, 0, 1]:
                     if dy == 0 and dx == 0:  # We only want to process neighbors, not re-process the center pixel.
                         continue
 
-                    ny, nx = y + dy, x + dx      # neighbor-y , neighbor-x
+                    ny, nx = y + dy, x + dx
 
                     #  Avoids reprocessing pixels that have already been added to the region.
                     if 0 <= ny < height and 0 <= nx < width and not visited[ny, nx]:
@@ -128,7 +123,7 @@ class ImageSegmenter:
 
                 segmented_small[y, x] = mean_color
 
-        # Convert back to BGR
+        # Convert back to RGB
         segmented_small = cv2.cvtColor(segmented_small.astype(np.uint8), cv2.COLOR_LUV2BGR)
 
         # Upsample the result to original size

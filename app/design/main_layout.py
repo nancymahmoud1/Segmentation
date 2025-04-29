@@ -432,8 +432,9 @@ class Ui_MainWindow(object):
 
         # Create value display labels for sliders
         self.kmeans_clusters_value = self.util.createLabel("3", "color: #e94560; font-weight: bold;")
-        self.region_threshold_value = self.util.createLabel("10", "color: #e94560; font-weight: bold;")
-        self.mean_shift_bandwidth_value = self.util.createLabel("20", "color: #e94560; font-weight: bold;")
+        self.region_threshold_value = self.util.createLabel("20", "color: #e94560; font-weight: bold;")
+        self.spatial_raduis_value = self.util.createLabel("15", "color: #e94560; font-weight: bold;")
+        self.mean_shift_bandwidth_value = self.util.createLabel("30", "color: #e94560; font-weight: bold;")
 
         # Create horizontal layouts for slider value displays
         kmeans_layout = QtWidgets.QHBoxLayout()
@@ -441,21 +442,16 @@ class Ui_MainWindow(object):
         kmeans_layout.addWidget(self.kmeans_clusters_value)
 
         region_layout = QtWidgets.QHBoxLayout()
-        region_layout.addWidget(self.util.createLabel("Region Threshold:", "color: white;"))
+        region_layout.addWidget(self.util.createLabel("Tolerance - Region Growing:", "color: white;"))
         region_layout.addWidget(self.region_threshold_value)
 
-        bandwidth_layout = QtWidgets.QHBoxLayout()
-        bandwidth_layout.addWidget(self.util.createLabel("Bandwidth:", "color: white;"))
-        bandwidth_layout.addWidget(self.mean_shift_bandwidth_value)
+        spatial_layout = QtWidgets.QHBoxLayout()
+        spatial_layout.addWidget(self.util.createLabel("Spatial Radius:", "color: white;"))
+        spatial_layout.addWidget(self.spatial_raduis_value)
 
-        # Add buttons to layout
-        self.page_segmentation_layout.addWidget(self.seg_back_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
-        self.page_segmentation_layout.addWidget(self.apply_kMeans_clustering_button)
-        self.page_segmentation_layout.addWidget(self.region_growing_button)
-        self.page_segmentation_layout.addWidget(self.mean_shift_button)
-        self.page_segmentation_layout.addWidget(self.apply_agglomerative_clustering_button)
-        self.page_segmentation_layout.addWidget(self.util.createSeparator())
+        bandwidth_layout = QtWidgets.QHBoxLayout()
+        bandwidth_layout.addWidget(self.util.createLabel("Bandwidth- Mean Shift:", "color: white;"))
+        bandwidth_layout.addWidget(self.mean_shift_bandwidth_value)
 
         # Create and add sliders
         self.clusters_number_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -465,7 +461,7 @@ class Ui_MainWindow(object):
 
         self.region_growing_tolerance_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.region_growing_tolerance_slider.setRange(1, 50)
-        self.region_growing_tolerance_slider.setValue(10)
+        self.region_growing_tolerance_slider.setValue(20)
         self.region_growing_tolerance_slider.setStyleSheet(self.slider_style)
 
         self.mean_shift_bandwidth_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -473,16 +469,36 @@ class Ui_MainWindow(object):
         self.mean_shift_bandwidth_slider.setValue(20)
         self.mean_shift_bandwidth_slider.setStyleSheet(self.slider_style)
 
+        self.spatial_length_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.spatial_length_slider.setRange(10, 30)
+        self.spatial_length_slider.setValue(15)
+        self.spatial_length_slider.setStyleSheet(self.slider_style)
+
+        # Add buttons to layout
+        self.page_segmentation_layout.addWidget(self.seg_back_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
         # Add widgets to layout with their value displays
         self.page_segmentation_layout.addLayout(kmeans_layout)
         self.page_segmentation_layout.addWidget(self.clusters_number_slider)
+        self.page_segmentation_layout.addWidget(self.apply_kMeans_clustering_button)
+        self.page_segmentation_layout.addWidget(self.apply_agglomerative_clustering_button)
+        self.page_segmentation_layout.addWidget(self.util.createSeparator())
+
+
         self.page_segmentation_layout.addLayout(region_layout)
         self.page_segmentation_layout.addWidget(self.region_growing_tolerance_slider)
+
+        self.page_segmentation_layout.addWidget(self.region_growing_button)
+
         self.page_segmentation_layout.addLayout(bandwidth_layout)
         self.page_segmentation_layout.addWidget(self.mean_shift_bandwidth_slider)
+        self.page_segmentation_layout.addLayout(spatial_layout)
+        self.page_segmentation_layout.addWidget(self.spatial_length_slider)
+        self.page_segmentation_layout.addWidget(self.mean_shift_button)
 
         # Connect slider signals to update the value labels
         self.clusters_number_slider.valueChanged.connect(lambda val: self.kmeans_clusters_value.setText(str(val)))
+        self.spatial_length_slider.valueChanged.connect(lambda val: self.spatial_raduis_value.setText(str(val)))
         self.region_growing_tolerance_slider.valueChanged.connect(lambda val: self.region_threshold_value.setText(str(val)))
         self.mean_shift_bandwidth_slider.valueChanged.connect(
             lambda val: self.mean_shift_bandwidth_value.setText(str(val)))

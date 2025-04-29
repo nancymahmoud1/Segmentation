@@ -133,6 +133,9 @@ class MainWindowController:
     def update_bandwidth_mean_shift(self):
         self.segmenter.set_bandwidth(self.ui.mean_shift_bandwidth_slider.value())
 
+    def update_spatial_radius_mean_shift(self):
+        self.segmenter.set_spatial_radius(self.ui.spatial_length_slider.value())
+
     def get_seed_point(self, event):
         """Handle mouse click to set seed point for region growing."""
         if self.original_image is None:
