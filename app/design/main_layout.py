@@ -332,7 +332,7 @@ class Ui_MainWindow(object):
 
         # Create new layout with consistent spacing
         self.page_thresholding_layout = QtWidgets.QVBoxLayout(self.page_thresholding_controls)
-        self.page_thresholding_layout.setSpacing(25)
+        self.page_thresholding_layout.setSpacing(30)
         self.page_thresholding_layout.setContentsMargins(10, 10, 10, 10)
 
         # Create and store buttons as attributes
@@ -370,7 +370,6 @@ class Ui_MainWindow(object):
         self.otsu_button = self.util.createButton("Otsu Thresholding", self.button_style)
         self.optimal_button = self.util.createButton("Optimal Thresholding", self.button_style)
         self.spectral_threshold_apply_button = self.util.createButton("Spectral Thresholding", self.button_style)
-        self.local_button = self.util.createButton("Local Thresholding", self.button_style)
 
         # Add widgets to layout
         self.page_thresholding_layout.addWidget(self.thresholding_back_button)
@@ -381,7 +380,6 @@ class Ui_MainWindow(object):
         self.page_thresholding_layout.addWidget(self.otsu_button)
         self.page_thresholding_layout.addWidget(self.optimal_button)
         self.page_thresholding_layout.addWidget(self.spectral_threshold_apply_button)
-        self.page_thresholding_layout.addWidget(self.local_button)
         self.page_thresholding_layout.addWidget(self.util.createSeparator())
 
         # Create and add sliders
