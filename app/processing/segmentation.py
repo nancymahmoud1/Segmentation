@@ -4,7 +4,6 @@ import numpy as np
 import cv2
 from collections import deque
 
-
 class ImageSegmenter:
     def __init__(self):
         # Region Growing
@@ -55,7 +54,6 @@ class ImageSegmenter:
         visited[self.seed_point] = True
 
         while queue:
-            # Dequeue the next pixel and mark it as part of the segment .
             y, x = queue.popleft()
             segmented[y, x] = 255  # white
 
@@ -80,10 +78,7 @@ class ImageSegmenter:
 
     def mean_shift(self, image):
         """Mean shift segmentation using sliding window """
-
         start = time.perf_counter()
-
-
 
         # Downsample the image (1/2 resolution) for faster processing
         scale_factor = 0.5
@@ -105,25 +100,25 @@ class ImageSegmenter:
                 mean_pos = current_pos.copy()
 
                 for _ in range(self.max_iterations):
-                    # Compute spatial and color distances
-                    spatial_dist_sq = (y_coords - mean_pos[0]) ** 2 + (x_coords - mean_pos[1]) ** 2
-                    color_dist_sq = np.sum((small_luv - mean_color) ** 2, axis=2)
-                    mask = (spatial_dist_sq <= self.spatial_radius ** 2) & (color_dist_sq <= self.bandwidth ** 2)
+                    # Compute distances
+                    spatial_dist_sq = (y_coords - mean_pos[0]) ** 2 + (x_coords - mean_pos[1]) ** 2  # Squared Euclidean distance from mean_pos
+                    color_dist_sq = np.sum((small_luv - mean_color) ** 2, axis=2)       # Squared LUV color difference from mean_color.
+                    mask = (spatial_dist_sq <= self.spatial_radius ** 2) & (color_dist_sq <= self.bandwidth ** 2) # Pixels within both spatial_radius and bandwidth.
                     if not np.any(mask):
                         break
 
-                    # Update mean
                     window_pixels = small_luv[mask]
                     window_y = y_coords[mask]
                     window_x = x_coords[mask]
 
+                    # Recomputes mean color/position of pixels in the window.
                     new_mean_color = np.mean(window_pixels, axis=0)
                     new_mean_pos = np.array([
                         np.mean(window_y),
                         np.mean(window_x)
                     ])
 
-                    # Check convergence
+                    # Check convergence : If the mean shifts very little (<1), assume convergence.
                     if (np.linalg.norm(new_mean_color - mean_color) < 1 and
                             np.linalg.norm(new_mean_pos - mean_pos) < 1):
                         break
