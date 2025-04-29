@@ -33,14 +33,13 @@ class ImageSegmenter:
     def set_mean_shift_params(self, spatial_radius, max_iterations):
         # Physical distance defining the neighborhood around each pixel.
         self.spatial_radius = spatial_radius
-        # Max. steps for mean shift convergence
-        self.max_iterations = max_iterations
+
+        self.max_iterations = max_iterations  # Max. steps
 
     def region_growing(self, image):
         """
          Retruns : Segmented image as binary mask (0 = background, 255 = segmented region).
         """
-
         if self.seed_point is None:
             raise ValueError("Seed point not set")
 
@@ -48,29 +47,31 @@ class ImageSegmenter:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         height, width = image.shape
-        segmented = np.zeros((height, width), dtype=np.uint8)  #  Output binary mask (0 = background, 255 = segmented region).
+        segmented = np.zeros((height, width), dtype=np.uint8)  # Output binary mask (0 = background, 255 = segmented region).
         visited = np.zeros((height, width), dtype=bool)
 
         seed_value = image[self.seed_point]  # Intensity of the seed pixel.
-        queue = deque([self.seed_point]) # Starts with the seed point (BFS processing)
+        queue = deque([self.seed_point]) # Starts with the seed point (BFS processing : Ensures the region grows outward from the seed)
         visited[self.seed_point] = True
 
         while queue:
             # Dequeue the next pixel and mark it as part of the segment .
             y, x = queue.popleft()
-            segmented[y, x] = 255  # (255 = white)
+            segmented[y, x] = 255  # white
 
-            # Check 8-connected neighbors :
-            # Check all adjacent pixels (including diagonals), skipping the center pixel.
-            for dy in [-1, 0, 1]:
+            # Check 8-connected neighbors : all adjacent pixels (including diagonals), skipping the center pixel.
+            for dy in [-1, 0, 1]:   # (d-y): Vertical offset (-1 = above, 0 = same row, 1 = below).
                 for dx in [-1, 0, 1]:
-                    if dy == 0 and dx == 0:
+                    if dy == 0 and dx == 0:  # We only want to process neighbors, not re-process the center pixel.
                         continue
 
-                    ny, nx = y + dy, x + dx
+                    ny, nx = y + dy, x + dx      # neighbor-y , neighbor-x
 
+                    #  Avoids reprocessing pixels that have already been added to the region.
                     if 0 <= ny < height and 0 <= nx < width and not visited[ny, nx]:
-                        pixel_value = image[ny, nx]
+                        pixel_value = image[ny, nx]  # Take the intensity of the neighbor pixel
+
+                        # If |neighbor_intensity - seed_intensity| ≤ tolerance, include the pixel in the region.
                         if abs(int(pixel_value) - int(seed_value)) <= self.tolerance:
                             visited[ny, nx] = True
                             queue.append((ny, nx))
@@ -82,17 +83,14 @@ class ImageSegmenter:
 
         start = time.perf_counter()
 
-        # # Convert to LUV color space
-        # luv_image = cv2.cvtColor(image, cv2.COLOR_BGR2LUV).astype(np.float32)
-        # height, width = luv_image.shape[:2]
-        # segmented = np.zeros_like(luv_image)
 
-        # Downsample the image ( half resolution) for faster processing
+
+        # Downsample the image (1/2 resolution) for faster processing
         scale_factor = 0.5
         small_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
 
-        # Process the smaller image
-        small_luv = cv2.cvtColor(small_image, cv2.COLOR_BGR2LUV).astype(np.float32) # Converts to LUV (better for perceptual color differences)
+        # Process the smaller image , Converts to LUV (better for perceptual color differences)
+        small_luv = cv2.cvtColor(small_image, cv2.COLOR_BGR2LUV).astype(np.float32)
         height, width = small_luv.shape[:2]
         segmented_small = np.zeros_like(small_luv)
 
